@@ -22,6 +22,13 @@ describe('API Endpoints', () => {
     nock.cleanAll();
   });
 
+  test('GET / should serve index.html', async () => {
+    const response = await request(app).get('/');
+    expect(response.statusCode).toBe(200);
+    expect(response.text).toContain('<!DOCTYPE html>');
+    expect(response.text).toContain('Faleproxy');
+  });
+
   test('POST /fetch should return 400 if URL is missing', async () => {
     const response = await request(app)
       .post('/fetch')
