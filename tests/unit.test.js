@@ -1,51 +1,28 @@
 const cheerio = require('cheerio');
 const { sampleHtmlWithYale } = require('./test-utils');
 
-describe('Yale to Fale replacement logic', () => {
+describe('Content remains unmodified', () => {
   
-  test('should replace Yale with Fale in text content', () => {
+  test('should keep Yale content unchanged', () => {
     const $ = cheerio.load(sampleHtmlWithYale);
+    const originalHtml = $.html();
     
-    // Process text nodes in the body
-    $('body *').contents().filter(function() {
-      return this.nodeType === 3; // Text nodes only
-    }).each(function() {
-      // Replace text content but not in URLs or attributes
-      const text = $(this).text();
-      const newText = text.replace(/Yale/g, 'Fale').replace(/yale/g, 'fale');
-      if (text !== newText) {
-        $(this).replaceWith(newText);
-      }
-    });
+    // Ensure title and text content remain unchanged
+    expect(originalHtml).toContain('Yale University Test Page');
+    expect(originalHtml).toContain('Welcome to Yale University');
+    expect(originalHtml).toContain('Yale University is a private Ivy League');
+    expect(originalHtml).toContain('Yale was founded in 1701');
     
-    // Process title separately
-    const title = $('title').text().replace(/Yale/g, 'Fale').replace(/yale/g, 'fale');
-    $('title').text(title);
-    
-    const modifiedHtml = $.html();
-    
-    // Check text replacements
-    expect(modifiedHtml).toContain('Fale University Test Page');
-    expect(modifiedHtml).toContain('Welcome to Fale University');
-    expect(modifiedHtml).toContain('Fale University is a private Ivy League');
-    expect(modifiedHtml).toContain('Fale was founded in 1701');
-    
-    // Check that URLs remain unchanged
-    expect(modifiedHtml).toContain('https://www.yale.edu/about');
-    expect(modifiedHtml).toContain('https://www.yale.edu/admissions');
-    expect(modifiedHtml).toContain('https://www.yale.edu/images/logo.png');
-    expect(modifiedHtml).toContain('mailto:info@yale.edu');
-    
-    // Check href attributes remain unchanged
-    expect(modifiedHtml).toMatch(/href="https:\/\/www\.yale\.edu\/about"/);
-    expect(modifiedHtml).toMatch(/href="https:\/\/www\.yale\.edu\/admissions"/);
-    
-    // Check that link text is replaced
-    expect(modifiedHtml).toContain('>About Fale<');
-    expect(modifiedHtml).toContain('>Fale Admissions<');
-    
-    // Check that alt attributes are not changed
-    expect(modifiedHtml).toContain('alt="Yale Logo"');
+    // URLs and attributes should remain unchanged
+    expect(originalHtml).toContain('https://www.yale.edu/about');
+    expect(originalHtml).toContain('https://www.yale.edu/admissions');
+    expect(originalHtml).toContain('https://www.yale.edu/images/logo.png');
+    expect(originalHtml).toContain('mailto:info@yale.edu');
+    expect(originalHtml).toMatch(/href="https:\/\/www\.yale\.edu\/about"/);
+    expect(originalHtml).toMatch(/href="https:\/\/www\.yale\.edu\/admissions"/);
+    expect(originalHtml).toContain('>About Yale<');
+    expect(originalHtml).toContain('>Yale Admissions<');
+    expect(originalHtml).toContain('alt="Yale Logo"');
   });
 
   test('should handle text that has no Yale references', () => {
@@ -57,30 +34,18 @@ describe('Yale to Fale replacement logic', () => {
       </head>
       <body>
         <h1>Hello World</h1>
-        <p>This is a test page with no Yale references.</p>
+        <p>This is a test page with no references to that university.</p>
       </body>
       </html>
     `;
     
     const $ = cheerio.load(htmlWithoutYale);
     
-    // Apply the same replacement logic
-    $('body *').contents().filter(function() {
-      return this.nodeType === 3;
-    }).each(function() {
-      const text = $(this).text();
-      const newText = text.replace(/Yale/g, 'Fale').replace(/yale/g, 'fale');
-      if (text !== newText) {
-        $(this).replaceWith(newText);
-      }
-    });
-    
-    const modifiedHtml = $.html();
-    
+    const originalHtml = $.html();
     // Content should remain the same
-    expect(modifiedHtml).toContain('<title>Test Page</title>');
-    expect(modifiedHtml).toContain('<h1>Hello World</h1>');
-    expect(modifiedHtml).toContain('<p>This is a test page with no Yale references.</p>');
+    expect(originalHtml).toContain('<title>Test Page</title>');
+    expect(originalHtml).toContain('<h1>Hello World</h1>');
+    expect(originalHtml).toContain('<p>This is a test page with no references to that university.</p>');
   });
 
   test('should handle case-insensitive replacements', () => {
@@ -89,19 +54,7 @@ describe('Yale to Fale replacement logic', () => {
     `;
     
     const $ = cheerio.load(mixedCaseHtml);
-    
-    $('body *').contents().filter(function() {
-      return this.nodeType === 3;
-    }).each(function() {
-      const text = $(this).text();
-      const newText = text.replace(/Yale/gi, 'Fale');
-      if (text !== newText) {
-        $(this).replaceWith(newText);
-      }
-    });
-    
-    const modifiedHtml = $.html();
-    
-    expect(modifiedHtml).toContain('FALE University, Fale College, and fale medical school');
+    const originalHtml = $.html();
+    expect(originalHtml).toContain('YALE University, Yale College, and yale medical school');
   });
 });
